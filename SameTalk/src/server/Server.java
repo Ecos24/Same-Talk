@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 
-import comminication.ClientThread;
+import comminication.ServersClientThread;
 import helper.Util;
 
 public class Server
@@ -14,7 +14,7 @@ public class Server
 	// a unique ID for each connection
 	private static int uniqueId;
 	// an ArrayList to keep the list of the Client
-	public static ArrayList<ClientThread> clientsList;
+	public static ArrayList<ServersClientThread> clientsList;
 	// the port number to listen for connection
 	private int port;
 	// the boolean that will be turned of to stop the server
@@ -25,7 +25,7 @@ public class Server
 		// the port
 		this.port = port;
 		// ArrayList for the Client list
-		clientsList = new ArrayList<ClientThread>();
+		clientsList = new ArrayList<ServersClientThread>();
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class Server
 				// if I was asked to stop
 				if(!keepGoing)
 					break;
-				ClientThread clientThread = new ClientThread(socket,++uniqueId);  // make a thread of it
+				ServersClientThread clientThread = new ServersClientThread(socket,++uniqueId);  // make a thread of it
 				clientsList.add(clientThread);                                  // save it in the ArrayList
 				clientThread.start();
 			}
@@ -92,7 +92,7 @@ public class Server
 			serverSocket.close();
 			for(int i = 0; i < clientsList.size(); ++i)
 			{
-				ClientThread gettingClientThread = clientsList.get(i);
+				ServersClientThread gettingClientThread = clientsList.get(i);
 				gettingClientThread.close();
 			}
 		}
@@ -107,11 +107,11 @@ public class Server
 	 * To broadcast a message to all Clients
 	 * @param message
 	 */
-	public static synchronized void broadCast(String message)
+	public static synchronized void broadCast(String message, int id)
 	{
 		// add HH:mm:ss and \n to the message
 		String time = Util.sdf.format(new Date());
-		String messageLf = time + " " + message + "\n";
+		String messageLf = time + "   " + message + "\n";
 		// display message
 		System.out.print(messageLf);
 		
@@ -119,12 +119,12 @@ public class Server
 		// because it has disconnected
 		for(int i = clientsList.size(); --i >= 0;)
 		{
-			ClientThread ct = clientsList.get(i);
+			ServersClientThread ct = clientsList.get(i);
 			// try to write to the Client if it fails remove it from the list
 			if(!ct.writeMsg(messageLf))
 			{
 				clientsList.remove(i);
-				Util.displayEvent("Disconnected Client " + ct.getUserName()+ " removed from list.");
+				Util.displayEvent("Disconnected Client " + ct.getClientUserName()+ " removed from list.");
 			}
 		}
 	}
@@ -138,9 +138,9 @@ public class Server
 		// Scan the array list until we found the Id
 		for(int i = 0; i < clientsList.size(); ++i)
 		{
-			ClientThread ct = clientsList.get(i);
+			ServersClientThread ct = clientsList.get(i);
 			// found it
-			if(ct.getUserId() == id)
+			if(ct.getClientId() == id)
 			{
 				clientsList.remove(i);
 				return;

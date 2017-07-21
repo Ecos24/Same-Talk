@@ -1,5 +1,6 @@
 package helper;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -21,8 +22,12 @@ public class ChatMessage implements Serializable
 	// MESSAGE an ordinary message
 	// LOGOUT to disconnect from the Server
 	public static final int WHOSETHERE = 0, MESSAGE = 1, LOGOUT = 2;
+	public static final String MESSAGE_TARGET_PERSONAL = "personal", 
+			MESSAGE_TARGET_BROADCAST = "broadcast", MESSAGE_TARGET_GROUP = "group"; 
 	private int type;
-	private String message;
+	private String message, msgTarget, msgTargetType;
+	private File file;
+	private boolean fileCheck;
 
 	// Constructor
 	public ChatMessage(int type, String message)
@@ -40,5 +45,39 @@ public class ChatMessage implements Serializable
 	public String getMessage()
 	{
 		return message;
+	}
+	public String getMsgTarget()
+	{
+		return msgTarget;
+	}
+	public String getMsgTargetType()
+	{
+		return msgTargetType;
+	}
+	public File getFile()
+	{
+		return file;
+	}
+	public boolean isFileCheck()
+	{
+		return fileCheck;
+	}
+
+	// Setters
+	public void setFileCheck(boolean fileCheck)
+	{
+		this.fileCheck = fileCheck;
+	}
+	public void setFile(File file)
+	{
+		this.file = file;
+	}
+	public void setMsgTarget(String msgTarget)
+	{
+		this.msgTarget = msgTarget;
+	}
+	public void setMsgTargetType(String msgTargetType)
+	{
+		this.msgTargetType = msgTargetType;
 	}
 }

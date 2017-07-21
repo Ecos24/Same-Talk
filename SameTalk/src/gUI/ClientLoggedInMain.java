@@ -1,25 +1,34 @@
 package gUI;
 
+//(DefaultMutableTreeNode) usersTree.getLastSelectedPathComponent().toString()
+
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
-
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 
 import client.ClientMain;
+import clientHelper.FileFunctions;
 import helper.ChatMessage;
-
-import javax.swing.JLabel;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionEvent;
+import helper.Util;
 
 public class ClientLoggedInMain
 {
@@ -27,15 +36,21 @@ public class ClientLoggedInMain
 	private final int framey = 100;
 	private final int frameLength = 600;
 	private final int frameheigth = 400;
-	private final Color bgColor = new Color(238, 238, 238);;
+	private final Color bgColor = new Color(238, 238, 238);
 	
 	private ClientMain client;
+	private String targetAudience;
 	
 	private JFrame clientFrame;
 
 	private JLabel sameTimeLogo;
+	private JButton broadcastChat;
+	private JButton personalChats;
+	private JButton groupChat;
 	private JButton logOutBtn;
+	private JScrollPane userTreeScrollPane;
 	private JTree usersTree;
+	private JScrollPane messageBoxScrollPane;
 	private JTextArea messageBox;
 	private JTextField readMessage;
 	private JButton sendMessage;
@@ -73,6 +88,10 @@ public class ClientLoggedInMain
 		initializeFrame();
 		associateFrameComponents();
 		initListeners();
+		
+		broadcastChat.doClick();
+		
+		readMessage.requestFocus();
 	}
 	
 	private void initClient()
@@ -83,11 +102,48 @@ public class ClientLoggedInMain
 		
 		client = new ClientMain(serverAddress, userName, porNumber, messageBox);
 		if( !client.start() )
+		{
+			System.out.println("Clossing becouse thread not started");
 			return;
+		}
 	}
-	
+		
 	private void initListeners()
 	{
+		broadcastChat.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent arg0)
+			{
+				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
+				
+				DefaultTreeModel tree = (DefaultTreeModel) usersTree.getModel();
+				DefaultMutableTreeNode userRoot = (DefaultMutableTreeNode) tree.getRoot();
+				userRoot.removeAllChildren();
+				tree.reload();
+				DefaultMutableTreeNode managers = new DefaultMutableTreeNode("Managers");
+				managers.add(new DefaultMutableTreeNode("Help"));
+				managers.add(new DefaultMutableTreeNode("Help1"));
+				managers.add(new DefaultMutableTreeNode("Help2"));
+				tree.insertNodeInto(managers, userRoot, userRoot.getChildCount());
+				
+				Util.expandAllNodes(usersTree, 0, usersTree.getRowCount());
+			}
+		});
+		groupChat.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent arg0)
+			{
+				targetAudience = ChatMessage.MESSAGE_TARGET_GROUP;
+			}
+		});
+		personalChats.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent arg0)
+			{
+				targetAudience = ChatMessage.MESSAGE_TARGET_PERSONAL;
+			}
+		});
+		
 		sendMessage.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -103,7 +159,12 @@ public class ClientLoggedInMain
 					else
 					{
 						readMessage.setText(null);
-						client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, msg));
+						ChatMessage chat = new ChatMessage(ChatMessage.MESSAGE, msg);
+						chat.setMsgTargetType(targetAudience);
+						if( targetAudience.equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
+							chat.setMsgTarget( ((DefaultMutableTreeNode)usersTree
+									.getLastSelectedPathComponent()).toString() );
+						client.sendMessage(chat);
 					}
 				}
 			}
@@ -113,7 +174,22 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				
+				String path = FileFunctions.selectFile();
+				if( JOptionPane.showConfirmDialog(clientFrame, "Do you really want's to share File -"+path)>0 )
+				{
+					ChatMessage chat = new ChatMessage(ChatMessage.MESSAGE, FileFunctions.getFileName(path));
+					chat.setFileCheck(true);
+					chat.setFile(new File(path));
+					chat.setMsgTargetType(targetAudience);
+					if( targetAudience.equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
+						chat.setMsgTarget( ((DefaultMutableTreeNode)usersTree
+								.getLastSelectedPathComponent()).toString() );
+					client.sendMessage(chat);
+					
+				}
+				else
+					return;
+				JOptionPane.showMessageDialog(clientFrame, System.getProperty("user.home"));
 			}
 		});
 
@@ -121,8 +197,25 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent arg0)
 			{
-				client.sendMessage(new ChatMessage(ChatMessage.LOGOUT, ""));
+				try
+				{
+					client.sendMessage(new ChatMessage(ChatMessage.LOGOUT, ""));
+				}
+				catch( NullPointerException e )
+				{
+					System.out.println("User was not LoggedIn in First Place Quiting the Application.");
+					clientFrame.dispose();
+				}
 				clientFrame.dispose();
+			}
+		});
+		
+		messageBoxScrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener()
+		{	
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e)
+			{
+				e.getAdjustable().setValue(e.getAdjustable().getMaximum());
 			}
 		});
 	}
@@ -130,12 +223,15 @@ public class ClientLoggedInMain
 	private void associateFrameComponents()
 	{
 		clientFrame.getContentPane().add(sameTimeLogo);
-		clientFrame.getContentPane().add(usersTree);
-		clientFrame.getContentPane().add(messageBox);
+		clientFrame.getContentPane().add(broadcastChat);
+		clientFrame.getContentPane().add(personalChats);
+		clientFrame.getContentPane().add(groupChat);
+		clientFrame.getContentPane().add(logOutBtn);
+		clientFrame.getContentPane().add(userTreeScrollPane);
+		clientFrame.getContentPane().add(messageBoxScrollPane);
 		clientFrame.getContentPane().add(readMessage);
 		clientFrame.getContentPane().add(sendMessage);
 		clientFrame.getContentPane().add(shareFile);
-		clientFrame.getContentPane().add(logOutBtn);
 		
 		clientFrame.getRootPane().setDefaultButton(sendMessage);
 	}
@@ -150,18 +246,31 @@ public class ClientLoggedInMain
 						Image.SCALE_SMOOTH)) );
 		sameTimeLogo.setFocusable(false);
 		
+		broadcastChat = new JButton("Broadcast");
+		broadcastChat.setBounds(150, 20, 110, 40);
+		
+		personalChats = new JButton("Personal");
+		personalChats.setBounds(270, 20, 100, 40);
+		
+		groupChat = new JButton("Groups");
+		groupChat.setBounds(380, 20, 90, 40);
+		
 		logOutBtn = new JButton("Logout");
 		logOutBtn.setBounds(500, 20, 90, 40);
 		
-		usersTree = new JTree();
-		//usersTree.setFont(new Font("Dialog", Font.PLAIN, 15));
-		usersTree.setBounds(10, 70, 110, 310);
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Users");
+		usersTree = new JTree(root);
+		usersTree.setFocusable(false);
+		userTreeScrollPane = new JScrollPane(usersTree);
+		userTreeScrollPane.setBounds(10, 70, 110, 310);
 		
 		messageBox = new JTextArea();
 		messageBox.setEditable(false);
 		messageBox.setFocusable(false);
 		messageBox.setFont(new Font("Dialog", Font.PLAIN, 15));
-		messageBox.setBounds(130, 70, 460, 250);
+		messageBox.setText("(Recieve Time) (Sent Time) (Username) : (Message)\n");
+		messageBoxScrollPane = new JScrollPane(messageBox);
+		messageBoxScrollPane.setBounds(130, 70, 460, 250);
 		
 		readMessage = new JTextField();
 		readMessage.setFont(new Font("Dialog", Font.PLAIN, 15));

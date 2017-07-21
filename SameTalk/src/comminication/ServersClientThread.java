@@ -10,43 +10,43 @@ import helper.ChatMessage;
 import helper.Util;
 import server.Server;
 
-public class ClientThread extends Thread
+public class ServersClientThread extends Thread
 {
 	private Socket clientSocket;
 	private ObjectInputStream clientInputStream;
 	private ObjectOutputStream clientOutputStream;
 	
 	// Unique id for Client.
-	int id;
+	int clientId;
 	// Clients name.
-	String userName;
+	String clientUsername;
 	// Chat Message from client
 	ChatMessage chatMessage;
 	// Date of connection
 	String date;
 	
-	public int getUserId()
+	public int getClientId()
 	{
-		return id;
+		return clientId;
 	}
-	public void setId(int id)
+	public void setClientId(int id)
 	{
-		this.id = id;
+		this.clientId = id;
+	}
+	public String getClientUserName()
+	{
+		return clientUsername;
+	}
+	public void setClientUserName(String userName)
+	{
+		this.clientUsername = userName;
 	}
 
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	public ClientThread(Socket clientSocket, int id)
+	public ServersClientThread(Socket clientSocket, int id)
 	{
 		super();
 		this.clientSocket = clientSocket;
-		this.id = id;
+		this.clientId = id;
 		
 		// Creating both Data Stream
 		try
@@ -57,8 +57,9 @@ public class ClientThread extends Thread
 			clientOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 			
 			// Read the UserName
-			userName = (String) clientInputStream.readUTF();
-			Util.displayEvent(userName + "just Connected");
+			System.out.println("Reading UserName");
+			clientUsername = (String) clientInputStream.readUTF();
+			Util.displayEvent(clientUsername + "just Connected");
 		}
 		catch(IOException e)
 		{
@@ -100,11 +101,26 @@ public class ClientThread extends Thread
 			switch(chatMessage.getType())
 			{
 				case ChatMessage.MESSAGE:
-					Server.broadCast(userName + " : " + msg);
+					switch(chatMessage.getMsgTargetType())
+					{
+						case ChatMessage.MESSAGE_TARGET_BROADCAST:
+							Server.broadCast(clientUsername + " : " + msg, clientId);
+							break;
+							
+						case ChatMessage.MESSAGE_TARGET_GROUP:
+							break;
+							
+						case ChatMessage.MESSAGE_TARGET_PERSONAL:
+							break;
+
+						default:
+							System.out.println("Discarding Message as Type is not defined");
+							break;
+					}
 					break;
 				
 				case ChatMessage.LOGOUT:
-					Util.displayEvent(userName + " disconnected with a LOGOUT message.");
+					Util.displayEvent(clientUsername + " disconnected with a LOGOUT message.");
 					keepGoing = false;
 					break;
 					
@@ -113,8 +129,8 @@ public class ClientThread extends Thread
 					// Scan ArrayList for users connected
 					for(int i = 0; i < Server.clientsList.size(); ++i)
 					{
-						ClientThread ct = Server.clientsList.get(i);
-						writeMsg((i+1) + ") " + ct.userName + " since " + ct.date);
+						ServersClientThread ct = Server.clientsList.get(i);
+						writeMsg((i+1) + ") " + ct.clientUsername + " since " + ct.date);
 					}
 					break;
 
@@ -123,7 +139,7 @@ public class ClientThread extends Thread
 			}
 		}
 		// Remove myself from the arrayList containing the list of the connected Clients.
-		Server.remove(id);
+		Server.remove(clientId);
 		close();
 	}
 	
@@ -138,7 +154,7 @@ public class ClientThread extends Thread
 		}
 		catch(IOException e)
 		{
-			Util.displayEvent(e.getClass().getName()+"Exception occured while closing "+userName+" Connection --> "+e.getMessage());
+			Util.displayEvent(e.getClass().getName()+"Exception occured while closing "+clientUsername+" Connection --> "+e.getMessage());
 			return;
 		}
 		try
@@ -148,7 +164,7 @@ public class ClientThread extends Thread
 		}
 		catch(IOException e)
 		{
-			Util.displayEvent(e.getClass().getName()+"Exception occured while closing "+userName+" Connection --> "+e.getMessage());
+			Util.displayEvent(e.getClass().getName()+"Exception occured while closing "+clientUsername+" Connection --> "+e.getMessage());
 			return;
 		}
 		try
@@ -158,7 +174,7 @@ public class ClientThread extends Thread
 		}
 		catch(IOException e)
 		{
-			Util.displayEvent(e.getClass().getName()+"Exception occured while closing "+userName+" Connection --> "+e.getMessage());
+			Util.displayEvent(e.getClass().getName()+"Exception occured while closing "+clientUsername+" Connection --> "+e.getMessage());
 			return;
 		}
 	}
@@ -178,11 +194,12 @@ public class ClientThread extends Thread
 		try
 		{
 			clientOutputStream.writeObject(msg);
+			clientOutputStream.flush();
 		}
 		// if an error occurs, do not abort just inform the user
 		catch(IOException e)
 		{
-			Util.displayEvent("Error sending message to " + userName);
+			Util.displayEvent("Error sending message to " + clientUsername);
 			Util.displayEvent(e.getClass().getName()+" Exception --> "+e.getMessage());
 		}
 		return true;

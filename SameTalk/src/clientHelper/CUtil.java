@@ -24,7 +24,7 @@ public class CUtil
 	 */
 	public void displayEvent(String msg)
 	{
-		String time = sdf.format(new Date()) + ") " + msg;
-		clientMessageBox.append(time+"\n");
+		String time = " "+ sdf.format(new Date()) + "\t" + msg;
+		clientMessageBox.append(time);
 	}
 }

@@ -70,6 +70,7 @@ public class ClientMain
 		try
 		{
 			serverOutputStram.writeUTF(userName);
+			serverOutputStram.flush();
 		}
 		catch(IOException e)
 		{
@@ -95,6 +96,7 @@ public class ClientMain
 		try
 		{
 			serverOutputStram.writeObject(msg);
+			serverOutputStram.flush();
 		}
 		catch(IOException e)
 		{
