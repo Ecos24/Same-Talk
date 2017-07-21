@@ -3,7 +3,6 @@ package gUI;
 //(DefaultMutableTreeNode) usersTree.getLastSelectedPathComponent().toString()
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionListener;
@@ -21,6 +20,9 @@ import javax.swing.JButton;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+
+import beanClasses.User;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -39,9 +41,10 @@ public class ClientLoggedInMain
 	private final Color bgColor = new Color(238, 238, 238);
 	
 	private ClientMain client;
+	private User currentUser;
 	private String targetAudience;
 	
-	private JFrame clientFrame;
+	public JFrame clientFrame;
 
 	private JLabel sameTimeLogo;
 	private JButton broadcastChat;
@@ -57,55 +60,21 @@ public class ClientLoggedInMain
 	private JButton shareFile;
 
 	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args)
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					ClientLoggedInMain window = new ClientLoggedInMain();
-					window.clientFrame.setVisible(true);
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
 	 * Create the application.
 	 */
-	public ClientLoggedInMain()
+	public ClientLoggedInMain(User user, ClientMain client)
 	{
+		// Initialize References.
+		this.currentUser = user;
+		this.client = client;
+		
 		initComponents();
-		initClient();
 		initializeFrame();
 		associateFrameComponents();
 		initListeners();
 		
-		broadcastChat.doClick();
-		
+		broadcastChat.doClick();	
 		readMessage.requestFocus();
-	}
-	
-	private void initClient()
-	{
-		int porNumber = 4501;
-		String serverAddress = "192.168.31.91";
-		String userName = "Anonymous";
-		
-		client = new ClientMain(serverAddress, userName, porNumber, messageBox);
-		if( !client.start() )
-		{
-			System.out.println("Clossing becouse thread not started");
-			return;
-		}
 	}
 		
 	private void initListeners()
@@ -154,12 +123,12 @@ public class ClientLoggedInMain
 					if( msg.equalsIgnoreCase("WHOSETHERE"))
 					{
 						readMessage.setText(null);
-						client.sendMessage(new ChatMessage(ChatMessage.WHOSETHERE, ""));
+						client.sendMessage(new ChatMessage(currentUser.getUserId(), ChatMessage.WHOSETHERE, ""));
 					}
 					else
 					{
 						readMessage.setText(null);
-						ChatMessage chat = new ChatMessage(ChatMessage.MESSAGE, msg);
+						ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
 						chat.setMsgTargetType(targetAudience);
 						if( targetAudience.equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
 							chat.setMsgTarget( ((DefaultMutableTreeNode)usersTree
@@ -175,9 +144,10 @@ public class ClientLoggedInMain
 			public void actionPerformed(ActionEvent e)
 			{
 				String path = FileFunctions.selectFile();
-				if( JOptionPane.showConfirmDialog(clientFrame, "Do you really want's to share File -"+path)>0 )
+				int ans = JOptionPane.showConfirmDialog(clientFrame, "Do you really want's to share File -"+path);
+				if( ans == 0 )
 				{
-					ChatMessage chat = new ChatMessage(ChatMessage.MESSAGE, FileFunctions.getFileName(path));
+					ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, FileFunctions.getFileName(path));
 					chat.setFileCheck(true);
 					chat.setFile(new File(path));
 					chat.setMsgTargetType(targetAudience);
@@ -187,9 +157,12 @@ public class ClientLoggedInMain
 					client.sendMessage(chat);
 					
 				}
-				else
+				else if( ans == 1 )
+				{
+					shareFile.doClick();
+				}
+				else if( ans == 2)
 					return;
-				JOptionPane.showMessageDialog(clientFrame, System.getProperty("user.home"));
 			}
 		});
 
@@ -199,7 +172,7 @@ public class ClientLoggedInMain
 			{
 				try
 				{
-					client.sendMessage(new ChatMessage(ChatMessage.LOGOUT, ""));
+					client.sendMessage(new ChatMessage(currentUser.getUserId(), ChatMessage.LOGOUT, ""));
 				}
 				catch( NullPointerException e )
 				{

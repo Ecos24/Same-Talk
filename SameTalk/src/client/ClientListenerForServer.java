@@ -6,6 +6,8 @@ import java.io.ObjectInputStream;
 import javax.swing.JTextArea;
 
 import clientHelper.CUtil;
+import clientHelper.FileFunctions;
+import helper.ChatMessage;
 
 public class ClientListenerForServer extends Thread
 {
@@ -33,8 +35,12 @@ public class ClientListenerForServer extends Thread
 		{
 			try
 			{
-				String msg = (String) serverInputStream.readObject();
-				utility.displayEvent(msg);
+				ChatMessage chatMessage = (ChatMessage) serverInputStream.readObject();
+				if( chatMessage.isFileCheck() )
+				{
+					FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());
+				}
+				utility.displayEvent(chatMessage.getMessage());
 			}
 			catch( ClassNotFoundException | IOException e )
 			{

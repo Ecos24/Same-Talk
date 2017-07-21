@@ -25,22 +25,27 @@ public class ChatMessage implements Serializable
 	public static final String MESSAGE_TARGET_PERSONAL = "personal", 
 			MESSAGE_TARGET_BROADCAST = "broadcast", MESSAGE_TARGET_GROUP = "group"; 
 	private int type;
-	private String message, msgTarget, msgTargetType;
+	private String sendersUsername, message, msgTarget, msgTargetType;
 	private File file;
 	private boolean fileCheck;
 
 	// Constructor
-	public ChatMessage(int type, String message)
+	public ChatMessage(String sendersUsername, int type, String message)
 	{
 		super();
 		this.type = type;
 		this.message = message;
+		this.sendersUsername = sendersUsername;
 	}
 
 	// Getters
 	public int getType()
 	{
 		return type;
+	}
+	public String getSendersUsername()
+	{
+		return sendersUsername;
 	}
 	public String getMessage()
 	{
@@ -67,6 +72,10 @@ public class ChatMessage implements Serializable
 	public void setFileCheck(boolean fileCheck)
 	{
 		this.fileCheck = fileCheck;
+	}
+	public void setMessage(String message)
+	{
+		this.message = message;
 	}
 	public void setFile(File file)
 	{

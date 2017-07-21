@@ -7,6 +7,7 @@ import java.net.Socket;
 
 import javax.swing.JTextArea;
 
+import beanClasses.User;
 import helper.ChatMessage;
 
 /**
@@ -22,35 +23,47 @@ public class ClientMain
 	private Socket serveSocket;
 
 	// Server Details
-	private String server, userName;
+	private String server;
+	private User currentUser;
 	private int port;
 	
 	// MessageBox
 	private JTextArea messageBox;
-
-	public ClientMain(String server, String userName, int port, JTextArea messageBox)
+	public void setMessageBox(JTextArea messageBox)
 	{
-		this.server = server;
-		this.userName = userName;
-		this.port = port;
 		this.messageBox = messageBox;
 	}
 
-	public boolean start()
+	public ClientMain(String server, User client, int port)
+	{
+		this.server = server;
+		this.currentUser = client;
+		this.port = port;
+	}
+	/*public ClientMain(String server, User client, int port, JTextArea messageBox)
+	{
+		this.server = server;
+		this.currentUser = client;
+		this.port = port;
+		this.messageBox = messageBox;
+	}*/
+	
+	public boolean authenticate() throws IOException, ClassNotFoundException
 	{
 		// Try to connect to Server.
 		try
 		{
 			serveSocket = new Socket(server, port);
+
+			displayCatchEvents("Connection accepted " + serveSocket.getInetAddress() + ":" + serveSocket.getPort());
 		}
 		// If Connection fails
 		catch(IOException e)
 		{
-			displayCatchEvents(e.getClass().getName() + " Error Connecting to server --> " + e.getMessage());
-			return false;
+			displayCatchEvents(e.getClass().getName() + " Exception making connection while LogIn --> " + e.getMessage());
+			disconnect();
+			throw e;
 		}
-
-		displayCatchEvents("Connection accepted " + serveSocket.getInetAddress() + ":" + serveSocket.getPort());
 
 		// Creating Both Data Streams
 		try
@@ -60,27 +73,50 @@ public class ClientMain
 		}
 		catch(IOException e)
 		{
-			displayCatchEvents(e.getClass().getName() + " Exception occured while creating Streams --> " + e.getMessage());
-			return false;
+			displayCatchEvents(e.getClass().getName() + " Exception while opening Stream while LogIn --> " + e.getMessage());
+			disconnect();
+			throw e;
 		}
 
 		// Create the Thread to listen from server.
 		new ClientListenerForServer(serverInputStream, messageBox).start();
-		// Send our UserName to the server.
+		// Send our User Details to the server that needs to be Authenticated.
 		try
 		{
-			serverOutputStram.writeUTF(userName);
+			serverOutputStram.writeObject(currentUser);
 			serverOutputStram.flush();
 		}
 		catch(IOException e)
 		{
-			displayCatchEvents(e.getClass().getName() + " Exception doing LogIn --> " + e.getMessage());
+			displayCatchEvents(e.getClass().getName() + " Exception writing user Object while LogIn --> " + e.getMessage());
 			disconnect();
-			return false;
+			throw e;
 		}
-
-		// Success we inform the caller that it worked.
-		return true;
+		
+		// Retrieve authentication Token from server.
+		User retrievedUser;
+		try
+		{
+			retrievedUser = (User) serverInputStream.readObject();
+		}
+		catch(ClassNotFoundException | IOException e)
+		{
+			displayCatchEvents(e.getClass().getName() + " Exception reading Object doing LogIn --> " + e.getMessage());
+			disconnect();
+			throw e;
+		}
+		
+		if( retrievedUser != null )
+		{
+			if( currentUser.getUniqueToken().equals(retrievedUser.getUniqueToken()) )
+			{
+				// Success we inform the caller that it worked.
+				return true;
+			}
+		}
+		
+		disconnect();
+		return false;
 	}
 
 	/**

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import comminication.ServersClientThread;
+import helper.ChatMessage;
 import helper.Util;
 
 public class Server
@@ -84,7 +85,13 @@ public class Server
 				if(!keepGoing)
 					break;
 				ServersClientThread clientThread = new ServersClientThread(socket,++uniqueId);  // make a thread of it
-				clientsList.add(clientThread);                                  // save it in the ArrayList
+				if( clientThread.confirmUser() )
+					clientsList.add(clientThread);	// save it in the ArrayList
+				else
+				{
+					socket.close();
+					continue;
+				}
 				clientThread.start();
 			}
 			
@@ -107,7 +114,7 @@ public class Server
 	 * To broadcast a message to all Clients
 	 * @param message
 	 */
-	public static synchronized void broadCast(String message, int id)
+	public static synchronized void broadCast(String message, ChatMessage chat, int id)
 	{
 		// add HH:mm:ss and \n to the message
 		String time = Util.sdf.format(new Date());
@@ -115,16 +122,15 @@ public class Server
 		// display message
 		System.out.print(messageLf);
 		
-		// we loop in reverse order in case we would have to remove a Client
-		// because it has disconnected
+		// we loop in reverse order in case we would have to remove a Client because it has disconnected.
 		for(int i = clientsList.size(); --i >= 0;)
 		{
 			ServersClientThread ct = clientsList.get(i);
 			// try to write to the Client if it fails remove it from the list
-			if(!ct.writeMsg(messageLf))
+			if(!ct.writeMsg(messageLf, chat))
 			{
 				clientsList.remove(i);
-				Util.displayEvent("Disconnected Client " + ct.getClientUserName()+ " removed from list.");
+				Util.displayEvent("Disconnected Client " + ct.getClient().getUserId()+ " removed from list.");
 			}
 		}
 	}

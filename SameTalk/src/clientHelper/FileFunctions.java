@@ -2,6 +2,7 @@ package clientHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,20 +20,22 @@ public class FileFunctions
 	 * @param userName
 	 * @return saved Image Path.
 	 */
-	public static String saveFile(String filePath, String userName)
+	@SuppressWarnings("deprecation")
+	public static String saveFile(File sourceFile, String userName)
 	{
-		String dest = "profilePics";
-		File sourceMain = new File(filePath);
-		File dstFolder = new File(dest);
+		System.out.println(System.getProperty("user.home")+File.separator+"Downloads");
+		File dstFolder = new File(System.getProperty("user.home")+File.separator+"Downloads");
 		
 		try
 		{
-			FileUtils.copyFileToDirectory(sourceMain, dstFolder);
-			File source = new File(dest+File.separator+getFileName(filePath));
-			dstFolder = new File(dest+File.separator+userName+getFileExtention(filePath));
-			Path extra = Paths.get(dest+File.separator+userName+getFileExtention(filePath));
+			FileUtils.copyFileToDirectory(sourceFile, dstFolder);
+			File source = new File(dstFolder.getAbsolutePath()+File.separator+sourceFile.getName());
+			Date dt = new Date();
+			dstFolder = new File(dstFolder.getAbsolutePath()+File.separator+userName+dt.getYear()+dt.getMonth()+dt.getDate()+dt.getHours()+dt.getMinutes()+dt.getSeconds()+getFileExtention(sourceFile.getAbsolutePath()));
+			Path extra = Paths.get(dstFolder.getAbsolutePath()+File.separator+userName+getFileExtention(sourceFile.getAbsolutePath()));
 			Files.deleteIfExists(extra);
 			FileUtils.moveFile(source, dstFolder);
+			dstFolder = new File(dstFolder.getAbsolutePath()+getFileName(sourceFile.getAbsolutePath()));
 			return dstFolder.getAbsolutePath();
 		}
 		catch(IOException e)
