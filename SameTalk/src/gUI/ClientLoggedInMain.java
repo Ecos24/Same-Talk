@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
+import client.ClientListenerForServer;
 import client.ClientMain;
 import clientHelper.FileFunctions;
 import helper.ChatMessage;
@@ -72,6 +73,9 @@ public class ClientLoggedInMain
 		initializeFrame();
 		associateFrameComponents();
 		initListeners();
+
+		// Create the Thread to listen from server.
+		new ClientListenerForServer(client.getServerInputStream(), messageBox).start();
 		
 		broadcastChat.doClick();	
 		readMessage.requestFocus();

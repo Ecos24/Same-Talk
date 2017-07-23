@@ -78,7 +78,7 @@ public class ServersClientThread extends Thread
 			{
 				clientOutputStream.writeObject(this.client);
 				// Call Authenticating user.
-				Util.displayEvent(client.getUserId() + "just Connected");
+				Util.displayEvent(client.getUserId() + " just Connected");
 				
 				return true;
 			}

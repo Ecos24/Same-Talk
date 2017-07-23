@@ -5,8 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.swing.JTextArea;
-
 import beanClasses.User;
 import helper.ChatMessage;
 
@@ -19,6 +17,10 @@ public class ClientMain
 {
 	// For I/O
 	private ObjectInputStream serverInputStream;
+	public ObjectInputStream getServerInputStream()
+	{
+		return serverInputStream;
+	}
 	private ObjectOutputStream serverOutputStram;
 	private Socket serveSocket;
 
@@ -26,13 +28,6 @@ public class ClientMain
 	private String server;
 	private User currentUser;
 	private int port;
-	
-	// MessageBox
-	private JTextArea messageBox;
-	public void setMessageBox(JTextArea messageBox)
-	{
-		this.messageBox = messageBox;
-	}
 
 	public ClientMain(String server, User client, int port)
 	{
@@ -77,9 +72,7 @@ public class ClientMain
 			disconnect();
 			throw e;
 		}
-
-		// Create the Thread to listen from server.
-		new ClientListenerForServer(serverInputStream, messageBox).start();
+		
 		// Send our User Details to the server that needs to be Authenticated.
 		try
 		{
@@ -93,6 +86,11 @@ public class ClientMain
 			throw e;
 		}
 		
+		if( !serveSocket.isConnected() )
+		{
+			displayCatchEvents("Connection Closed from Server Side might be due to UnAuthenticity of User.");
+			return false;
+		}
 		// Retrieve authentication Token from server.
 		User retrievedUser;
 		try
@@ -103,7 +101,7 @@ public class ClientMain
 		{
 			displayCatchEvents(e.getClass().getName() + " Exception reading Object doing LogIn --> " + e.getMessage());
 			disconnect();
-			throw e;
+			return false;
 		}
 		
 		if( retrievedUser != null )
@@ -111,6 +109,8 @@ public class ClientMain
 			if( currentUser.getUniqueToken().equals(retrievedUser.getUniqueToken()) )
 			{
 				// Success we inform the caller that it worked.
+				System.out.println("Client successfully authenticated.");
+				
 				return true;
 			}
 		}
