@@ -131,6 +131,7 @@ public class ClientLoggedInMain
 					}
 					else
 					{
+						// Check Message.
 						readMessage.setText(null);
 						ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
 						chat.setMsgTargetType(targetAudience);
