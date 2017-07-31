@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.JTextArea;
+import javax.swing.JTree;
 
 public class CUtil
 {
@@ -26,5 +27,16 @@ public class CUtil
 	{
 		String time = " "+ sdf.format(new Date()) + "\t" + msg;
 		clientMessageBox.append(time);
+	}
+	
+	public static void expandAllNodes(JTree tree, int startingIndex, int rowCount)
+	{
+	    for(int i=startingIndex;i<rowCount;++i)
+	    {
+	        tree.expandRow(i);
+	    }
+
+	    if(tree.getRowCount()!=rowCount)
+	        expandAllNodes(tree, rowCount, tree.getRowCount());
 	}
 }

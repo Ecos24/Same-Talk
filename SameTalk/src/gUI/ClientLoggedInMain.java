@@ -29,9 +29,9 @@ import javax.swing.JScrollPane;
 
 import client.ClientListenerForServer;
 import client.ClientMain;
+import clientHelper.CUtil;
 import clientHelper.FileFunctions;
 import helper.ChatMessage;
-import helper.Util;
 
 public class ClientLoggedInMain
 {
@@ -99,7 +99,7 @@ public class ClientLoggedInMain
 				managers.add(new DefaultMutableTreeNode("Help2"));
 				tree.insertNodeInto(managers, userRoot, userRoot.getChildCount());
 				
-				Util.expandAllNodes(usersTree, 0, usersTree.getRowCount());
+				CUtil.expandAllNodes(usersTree, 0, usersTree.getRowCount());
 			}
 		});
 		groupChat.addActionListener(new ActionListener()

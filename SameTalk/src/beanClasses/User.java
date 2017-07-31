@@ -2,13 +2,6 @@ package beanClasses;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table (name="REGISTERED_USERS")
 public class User implements Serializable
 {
 	/**
@@ -16,10 +9,8 @@ public class User implements Serializable
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	@Id
 	private String userId;
 	private String password;
-	@Column( name = "Token")
 	private String uniqueToken;
 	
 	
