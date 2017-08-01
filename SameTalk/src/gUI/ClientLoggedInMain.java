@@ -42,6 +42,7 @@ public class ClientLoggedInMain
 	private final Color bgColor = new Color(238, 238, 238);
 	
 	private ClientMain client;
+	private ClientListenerForServer clistenerForServer;
 	private User currentUser;
 	private String targetAudience;
 	
@@ -75,7 +76,8 @@ public class ClientLoggedInMain
 		initListeners();
 
 		// Create the Thread to listen from server.
-		new ClientListenerForServer(client.getServerInputStream(), messageBox).start();
+		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame, messageBox);
+		clistenerForServer.start();
 		
 		broadcastChat.doClick();	
 		readMessage.requestFocus();
@@ -87,6 +89,9 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent arg0)
 			{
+				// Test the connection
+				checkServerListener();
+				
 				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
 				
 				DefaultTreeModel tree = (DefaultTreeModel) usersTree.getModel();
@@ -106,6 +111,9 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent arg0)
 			{
+				// Test the connection
+				checkServerListener();
+				
 				targetAudience = ChatMessage.MESSAGE_TARGET_GROUP;
 			}
 		});
@@ -113,6 +121,9 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent arg0)
 			{
+				// Test the connection
+				checkServerListener();
+				
 				targetAudience = ChatMessage.MESSAGE_TARGET_PERSONAL;
 			}
 		});
@@ -121,6 +132,9 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// Test the connection
+				checkServerListener();
+				
 				String msg = readMessage.getText();
 				if( !msg.equals("") )
 				{
@@ -148,6 +162,9 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent e)
 			{
+				// Test the connection
+				checkServerListener();
+				
 				String path = FileFunctions.selectFile();
 				int ans = JOptionPane.showConfirmDialog(clientFrame, "Do you really want's to share File -"+path);
 				if( ans == 0 )
@@ -175,6 +192,9 @@ public class ClientLoggedInMain
 		{
 			public void actionPerformed(ActionEvent arg0)
 			{
+				// Test the connection
+				checkServerListener();
+				
 				try
 				{
 					client.sendMessage(new ChatMessage(currentUser.getUserId(), ChatMessage.LOGOUT, ""));
@@ -282,7 +302,15 @@ public class ClientLoggedInMain
 				logOutBtn.doClick();
 				super.windowClosing(e);
 			}
-			
 		});
+	}
+	
+	private void checkServerListener()
+	{
+		if( !clistenerForServer.isAlive() )
+		{
+			JOptionPane.showMessageDialog(clientFrame, "Server has Shutdown exiting the application!!!");
+			System.exit(1);
+		}
 	}
 }

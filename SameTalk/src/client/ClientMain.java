@@ -35,13 +35,6 @@ public class ClientMain
 		this.currentUser = client;
 		this.port = port;
 	}
-	/*public ClientMain(String server, User client, int port, JTextArea messageBox)
-	{
-		this.server = server;
-		this.currentUser = client;
-		this.port = port;
-		this.messageBox = messageBox;
-	}*/
 	
 	public boolean authenticate() throws IOException, ClassNotFoundException
 	{

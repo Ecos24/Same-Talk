@@ -81,7 +81,6 @@ public class ClientLogIn
 	
 	private void associateFrameComponents()
 	{
-		//frame.setJMenuBar(menuBar);
 		clientLogInframe.getContentPane().add(bgLabel);
 		clientLogInframe.getContentPane().add(serverIp);
 		clientLogInframe.getContentPane().add(serverIpTextPane);
