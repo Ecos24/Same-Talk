@@ -36,16 +36,30 @@ public class ClientListenerForServer extends Thread
 	@Override
 	public void run()
 	{
+		Object obj;
 		while(true)
 		{
+			obj = null;
 			try
 			{
-				ChatMessage chatMessage = (ChatMessage) serverInputStream.readObject();
-				if( chatMessage.isFileCheck() )
+				System.out.println("Reading an OBject from inputStream.");
+				obj = serverInputStream.readObject();
+				System.out.println("Got an Object");
+				if( obj instanceof ChatMessage )
 				{
-					FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());
+					System.out.println("Object received is chat.");
+					ChatMessage chatMessage = (ChatMessage) obj; 
+					if( chatMessage.isFileCheck() )
+					{
+						FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());
+					}
+					System.out.println("Displaying Chat received");
+					utility.displayEvent(chatMessage.getMessage());
 				}
-				utility.displayEvent(chatMessage.getMessage());
+				else
+				{
+					System.out.println("Object not a chat.");
+				}
 			}
 			catch(ClassNotFoundException e)
 			{

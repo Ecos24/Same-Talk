@@ -19,7 +19,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
 import beanClasses.User;
 
@@ -79,6 +78,10 @@ public class ClientLoggedInMain
 		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame, messageBox);
 		clistenerForServer.start();
 		
+		// Create Status listener from Server.
+		/*ClientStatusListener statusListener = new ClientStatusListener(client.getServerInputStream(), usersTree);
+		statusListener.start();*/
+		
 		broadcastChat.doClick();	
 		readMessage.requestFocus();
 	}
@@ -93,16 +96,6 @@ public class ClientLoggedInMain
 				checkServerListener();
 				
 				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
-				
-				DefaultTreeModel tree = (DefaultTreeModel) usersTree.getModel();
-				DefaultMutableTreeNode userRoot = (DefaultMutableTreeNode) tree.getRoot();
-				userRoot.removeAllChildren();
-				tree.reload();
-				DefaultMutableTreeNode managers = new DefaultMutableTreeNode("Managers");
-				managers.add(new DefaultMutableTreeNode("Help"));
-				managers.add(new DefaultMutableTreeNode("Help1"));
-				managers.add(new DefaultMutableTreeNode("Help2"));
-				tree.insertNodeInto(managers, userRoot, userRoot.getChildCount());
 				
 				CUtil.expandAllNodes(usersTree, 0, usersTree.getRowCount());
 			}
