@@ -9,6 +9,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import beanClasses.ClientStatus;
+import helper.WordUtil;
 
 public class ClientStatusListener
 {
@@ -23,33 +24,36 @@ public class ClientStatusListener
 	@SuppressWarnings("unchecked")
 	public void updateUserTree(Object obj)
 	{
-		System.out.println("Updating Users Tree.");
-		Iterator<LinkedHashMap<String, ArrayList<ClientStatus>>> itcsl = 
-				((LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>>)obj).values().iterator();
-		while(itcsl.hasNext())
-		{
-			Iterator<ArrayList<ClientStatus>> tl = itcsl.next().values().iterator();
-			while( tl.hasNext() )
-			{
-				Iterator<ClientStatus> te = tl.next().iterator();
-				while( te.hasNext() )
-				{
-					ClientStatus cs = te.next();
-					System.out.println(cs.getClientId()+" "+cs.getClientStatus());
-				}
-			}
-		}
-		
+		System.out.println("Updating Users Tree.");		
 		// Update the Tree.
 		DefaultTreeModel tree = (DefaultTreeModel) usersTree.getModel();
 		DefaultMutableTreeNode userRoot = (DefaultMutableTreeNode) tree.getRoot();
 		userRoot.removeAllChildren();
 		tree.reload();
 		
-		DefaultMutableTreeNode managers = new DefaultMutableTreeNode("Managers");
-		managers.add(new DefaultMutableTreeNode("Help"));
-		managers.add(new DefaultMutableTreeNode("Help1"));
-		managers.add(new DefaultMutableTreeNode("Help2"));
-		tree.insertNodeInto(managers, userRoot, userRoot.getChildCount()); 
+		LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>> clientStatusMap =
+				(LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>>)obj;
+		
+		Iterator<String> deptkeys = clientStatusMap.keySet().iterator();
+		while(deptkeys.hasNext())
+		{
+			String dept = deptkeys.next();
+			DefaultMutableTreeNode deptNode = new DefaultMutableTreeNode(WordUtil.capitalizeString(dept));
+			LinkedHashMap<String,ArrayList<ClientStatus>> singleDeptMap = clientStatusMap.get(dept);
+			Iterator<String> posKeys = singleDeptMap.keySet().iterator();
+			while( posKeys.hasNext() )
+			{
+				String pos = posKeys.next();
+				DefaultMutableTreeNode posNode = new DefaultMutableTreeNode(WordUtil.capitalizeString(pos));
+				ArrayList<ClientStatus> singlePosMap = singleDeptMap.get(pos);
+				Iterator<ClientStatus> te = singlePosMap.iterator();
+				while( te.hasNext() )
+				{
+					posNode.add(new DefaultMutableTreeNode(WordUtil.capitalizeString(te.next().getClientId())));
+				}
+				deptNode.add(posNode);
+			}
+			tree.insertNodeInto(deptNode, userRoot, userRoot.getChildCount());
+		} 
 	}
 }

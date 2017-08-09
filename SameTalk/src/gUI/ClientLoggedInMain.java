@@ -36,8 +36,8 @@ public class ClientLoggedInMain
 {
 	private final int framex = 100;
 	private final int framey = 100;
-	private final int frameLength = 600;
-	private final int frameheigth = 400;
+	private final int frameLength = 1000;
+	private final int frameheigth = 610;
 	private final Color bgColor = new Color(238, 238, 238);
 	
 	private ClientMain client;
@@ -52,6 +52,7 @@ public class ClientLoggedInMain
 	private JButton personalChats;
 	private JButton groupChat;
 	private JButton logOutBtn;
+	private JLabel currentChatStatus;
 	private JScrollPane userTreeScrollPane;
 	private JTree usersTree;
 	private JScrollPane messageBoxScrollPane;
@@ -93,6 +94,9 @@ public class ClientLoggedInMain
 				checkServerListener();
 				
 				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
+				currentChatStatus.setText("BroadCasting");
+				usersTree.setEnabled(false);
+				usersTree.setFocusable(false);
 				
 				CUtil.expandAllNodes(usersTree, 0, usersTree.getRowCount());
 			}
@@ -105,6 +109,9 @@ public class ClientLoggedInMain
 				checkServerListener();
 				
 				targetAudience = ChatMessage.MESSAGE_TARGET_GROUP;
+				currentChatStatus.setText("Group Chat");
+				usersTree.setEnabled(true);
+				usersTree.setFocusable(true);
 			}
 		});
 		personalChats.addActionListener(new ActionListener()
@@ -115,6 +122,9 @@ public class ClientLoggedInMain
 				checkServerListener();
 				
 				targetAudience = ChatMessage.MESSAGE_TARGET_PERSONAL;
+				currentChatStatus.setText("Personal Chat");
+				usersTree.setEnabled(true);
+				usersTree.setFocusable(true);
 			}
 		});
 		
@@ -215,6 +225,7 @@ public class ClientLoggedInMain
 		clientFrame.getContentPane().add(personalChats);
 		clientFrame.getContentPane().add(groupChat);
 		clientFrame.getContentPane().add(logOutBtn);
+		clientFrame.getContentPane().add(currentChatStatus);
 		clientFrame.getContentPane().add(userTreeScrollPane);
 		clientFrame.getContentPane().add(messageBoxScrollPane);
 		clientFrame.getContentPane().add(readMessage);
@@ -227,7 +238,7 @@ public class ClientLoggedInMain
 	private void initComponents()
 	{
 		sameTimeLogo = new JLabel();
-		sameTimeLogo.setBounds(5, 5, 130, 60);
+		sameTimeLogo.setBounds(5, 5, 205, 65);
 		sameTimeLogo.setIcon(new ImageIcon(
 				new ImageIcon("images/sameTime.png").getImage()
 				.getScaledInstance(sameTimeLogo.getWidth(), sameTimeLogo.getHeight(),
@@ -235,22 +246,26 @@ public class ClientLoggedInMain
 		sameTimeLogo.setFocusable(false);
 		
 		broadcastChat = new JButton("Broadcast");
-		broadcastChat.setBounds(150, 20, 110, 40);
+		broadcastChat.setBounds(220, 20, 110, 40);
 		
 		personalChats = new JButton("Personal");
-		personalChats.setBounds(270, 20, 100, 40);
+		personalChats.setBounds(340, 20, 100, 40);
 		
 		groupChat = new JButton("Groups");
-		groupChat.setBounds(380, 20, 90, 40);
+		groupChat.setBounds(460, 20, 90, 40);
 		
 		logOutBtn = new JButton("Logout");
-		logOutBtn.setBounds(500, 20, 90, 40);
+		logOutBtn.setBounds(890, 20, 90, 40);
+		
+		currentChatStatus = new JLabel();
+		currentChatStatus.setFont(new Font("Dialog", Font.BOLD, 17));
+		currentChatStatus.setBounds(10, 80, 200, 40);
 		
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Users");
 		usersTree = new JTree(root);
 		usersTree.setFocusable(false);
 		userTreeScrollPane = new JScrollPane(usersTree);
-		userTreeScrollPane.setBounds(10, 70, 110, 310);
+		userTreeScrollPane.setBounds(10, 130, 200, 460);
 		
 		messageBox = new JTextArea();
 		messageBox.setEditable(false);
@@ -258,17 +273,17 @@ public class ClientLoggedInMain
 		messageBox.setFont(new Font("Dialog", Font.PLAIN, 15));
 		messageBox.setText("(Recieve Time) (Sent Time) (Username) : (Message)\n");
 		messageBoxScrollPane = new JScrollPane(messageBox);
-		messageBoxScrollPane.setBounds(130, 70, 460, 250);
+		messageBoxScrollPane.setBounds(220, 80, 760, 450);
 		
 		readMessage = new JTextField();
 		readMessage.setFont(new Font("Dialog", Font.PLAIN, 15));
-		readMessage.setBounds(130, 340, 260, 40);
+		readMessage.setBounds(220, 550, 560, 40);
 		
 		sendMessage = new JButton("Send");
-		sendMessage.setBounds(400, 340, 70, 40);
+		sendMessage.setBounds(790, 550, 70, 40);
 		
 		shareFile = new JButton("Share File");
-		shareFile.setBounds(480, 340, 110, 40);
+		shareFile.setBounds(870, 550, 110, 40);
 	}
 
 	/**
