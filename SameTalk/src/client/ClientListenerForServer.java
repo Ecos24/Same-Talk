@@ -2,11 +2,16 @@ package client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
+import javax.swing.JTree;
 
+import beanClasses.ClientStatus;
 import clientHelper.CUtil;
 import clientHelper.FileFunctions;
 import helper.ChatMessage;
@@ -23,13 +28,16 @@ public class ClientListenerForServer extends Thread
 	
 	// ClientUtil Reference.
 	private CUtil utility;
+	private ClientStatusListener statusListener = null;
 
-	public ClientListenerForServer(ObjectInputStream serverInputStream, JFrame clientFrame , JTextArea messageBox)
+	public ClientListenerForServer(ObjectInputStream serverInputStream, JFrame clientFrame ,
+			JTextArea messageBox, JTree userTree)
 	{
 		super();
 		this.clientFrame = clientFrame;
 		this.clientMessageBox = messageBox;
 		this.serverInputStream = serverInputStream;
+		this.statusListener = new ClientStatusListener(userTree);
 		this.utility = new CUtil(clientMessageBox);
 	}
 	
@@ -47,14 +55,36 @@ public class ClientListenerForServer extends Thread
 				System.out.println("Got an Object");
 				if( obj instanceof ChatMessage )
 				{
-					System.out.println("Object received is chat.");
 					ChatMessage chatMessage = (ChatMessage) obj; 
 					if( chatMessage.isFileCheck() )
 					{
 						FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());
 					}
-					System.out.println("Displaying Chat received");
 					utility.displayEvent(chatMessage.getMessage());
+				}
+				else if( obj instanceof LinkedHashMap<?, ?> )
+				{
+					System.out.println("Found LinkedHashMap");
+					@SuppressWarnings("unchecked")
+					Iterator<LinkedHashMap<String, ArrayList<ClientStatus>>> itcsl = 
+							((LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>>) obj).values().iterator();
+					if( itcsl.hasNext() )
+					{
+						Iterator<ArrayList<ClientStatus>> tl = itcsl.next().values().iterator();
+						if( tl.hasNext() )
+						{
+							Iterator<ClientStatus> te = tl.next().iterator();
+							if( te.hasNext() )
+							{
+								if( te.next() instanceof ClientStatus )
+									statusListener.updateUserTree(obj);
+							}
+						}
+						else
+							continue;
+					}
+					else
+						continue;
 				}
 				else
 				{

@@ -75,12 +75,9 @@ public class ClientLoggedInMain
 		initListeners();
 
 		// Create the Thread to listen from server.
-		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame, messageBox);
+		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame,
+				messageBox, usersTree);
 		clistenerForServer.start();
-		
-		// Create Status listener from Server.
-		/*ClientStatusListener statusListener = new ClientStatusListener(client.getServerInputStream(), usersTree);
-		statusListener.start();*/
 		
 		broadcastChat.doClick();	
 		readMessage.requestFocus();
@@ -279,7 +276,7 @@ public class ClientLoggedInMain
 	 */
 	private void initializeFrame()
 	{
-		clientFrame = new JFrame("Same Time");
+		clientFrame = new JFrame("Same Time: Welcome "+this.currentUser.getUserId());
 		clientFrame.setBounds(framex, framey, frameLength, frameheigth);
 		clientFrame.setBackground(bgColor);
 		clientFrame.getContentPane().setLayout(null);
