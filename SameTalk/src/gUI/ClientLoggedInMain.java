@@ -19,6 +19,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import beanClasses.User;
 
@@ -28,9 +29,14 @@ import javax.swing.JScrollPane;
 
 import client.ClientListenerForServer;
 import client.ClientMain;
-import clientHelper.CUtil;
 import clientHelper.FileFunctions;
 import helper.ChatMessage;
+import helper.WordUtil;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
 
 public class ClientLoggedInMain
 {
@@ -48,12 +54,11 @@ public class ClientLoggedInMain
 	public JFrame clientFrame;
 
 	private JLabel sameTimeLogo;
-	private JButton broadcastChat;
-	private JButton personalChats;
-	private JButton groupChat;
+	private JButton newGp;
+	private JButton viewEditGp;
 	private JButton logOutBtn;
-	private JLabel currentChatStatus;
 	private JScrollPane userTreeScrollPane;
+	private DefaultMutableTreeNode userTreeRoot;
 	private JTree usersTree;
 	private JScrollPane messageBoxScrollPane;
 	private JTextArea messageBox;
@@ -79,61 +84,44 @@ public class ClientLoggedInMain
 		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame,
 				messageBox, usersTree);
 		clistenerForServer.start();
-		
-		broadcastChat.doClick();	
+	
 		readMessage.requestFocus();
 	}
 		
 	private void initListeners()
-	{
-		broadcastChat.addActionListener(new ActionListener()
+	{		
+		// Selection of User/Group.
+		usersTree.addKeyListener(new KeyAdapter()
 		{
-			public void actionPerformed(ActionEvent arg0)
+			@Override
+			public void keyPressed(KeyEvent arg0)
 			{
-				// Test the connection
-				checkServerListener();
-				
-				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
-				currentChatStatus.setText("BroadCasting");
-				usersTree.setEnabled(false);
-				usersTree.setFocusable(false);
-				
-				CUtil.expandAllNodes(usersTree, 0, usersTree.getRowCount());
-			}
-		});
-		groupChat.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent arg0)
-			{
-				// Test the connection
-				checkServerListener();
-				
-				targetAudience = ChatMessage.MESSAGE_TARGET_GROUP;
-				currentChatStatus.setText("Group Chat");
-				usersTree.setEnabled(true);
-				usersTree.setFocusable(true);
-			}
-		});
-		personalChats.addActionListener(new ActionListener()
-		{
-			public void actionPerformed(ActionEvent arg0)
-			{
-				// Test the connection
-				checkServerListener();
-				
-				targetAudience = ChatMessage.MESSAGE_TARGET_PERSONAL;
-				currentChatStatus.setText("Personal Chat");
-				usersTree.setEnabled(true);
-				usersTree.setFocusable(true);
+				if( arg0.getKeyCode() == KeyEvent.VK_ENTER )
+				{
+					userSelected();
+				}
 			}
 		});
 		
+		usersTree.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent arg0)
+			{
+				if( arg0.getClickCount() == 2 )
+					userSelected();
+			}
+		});
+		
+		// For Sending Broadcast Message.
 		sendMessage.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				// Test the connection
 				checkServerListener();
+				
+				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
 				
 				String msg = readMessage.getText();
 				if( !msg.equals("") )
@@ -149,21 +137,21 @@ public class ClientLoggedInMain
 						readMessage.setText(null);
 						ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
 						chat.setMsgTargetType(targetAudience);
-						if( targetAudience.equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
-							chat.setMsgTarget( ((DefaultMutableTreeNode)usersTree
-									.getLastSelectedPathComponent()).toString() );
 						client.sendMessage(chat);
 					}
 				}
 			}
 		});
 		
+		// BroadCast File.
 		shareFile.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
 				// Test the connection
 				checkServerListener();
+				
+				targetAudience = ChatMessage.MESSAGE_TARGET_BROADCAST;
 				
 				String path = FileFunctions.selectFile();
 				int ans = JOptionPane.showConfirmDialog(clientFrame, "Do you really want's to share File -"+path);
@@ -173,9 +161,6 @@ public class ClientLoggedInMain
 					chat.setFileCheck(true);
 					chat.setFile(new File(path));
 					chat.setMsgTargetType(targetAudience);
-					if( targetAudience.equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
-						chat.setMsgTarget( ((DefaultMutableTreeNode)usersTree
-								.getLastSelectedPathComponent()).toString() );
 					client.sendMessage(chat);
 					
 				}
@@ -218,14 +203,46 @@ public class ClientLoggedInMain
 		});
 	}
 	
+	protected void userSelected()
+	{
+		TreePath[] path = usersTree.getSelectionPaths();
+		String selected = "";
+		if( path != null )
+		{
+			for(TreePath treePath : path)
+			{
+				selected = selected + treePath.getLastPathComponent();
+			}
+			DefaultMutableTreeNode node = userTreeRoot.getNextNode();
+			while( node != null )
+			{
+				if( node.isLeaf() )
+				{
+					if( node.getUserObject().toString().equals(selected) )
+					{
+						// A User is selected.
+						JOptionPane.showMessageDialog(clientFrame, "User");
+					}
+				}
+				else
+				{
+					if( node.getUserObject().toString().equals(selected) )
+					{
+						// A Group is Selected.
+						JOptionPane.showMessageDialog(clientFrame, "Group");
+					}
+				}
+				node = node.getNextNode();
+			}
+		}
+	}
+
 	private void associateFrameComponents()
 	{
 		clientFrame.getContentPane().add(sameTimeLogo);
-		clientFrame.getContentPane().add(broadcastChat);
-		clientFrame.getContentPane().add(personalChats);
-		clientFrame.getContentPane().add(groupChat);
+		clientFrame.getContentPane().add(newGp);
+		clientFrame.getContentPane().add(viewEditGp);
 		clientFrame.getContentPane().add(logOutBtn);
-		clientFrame.getContentPane().add(currentChatStatus);
 		clientFrame.getContentPane().add(userTreeScrollPane);
 		clientFrame.getContentPane().add(messageBoxScrollPane);
 		clientFrame.getContentPane().add(readMessage);
@@ -245,27 +262,21 @@ public class ClientLoggedInMain
 						Image.SCALE_SMOOTH)) );
 		sameTimeLogo.setFocusable(false);
 		
-		broadcastChat = new JButton("Broadcast");
-		broadcastChat.setBounds(220, 20, 110, 40);
+		newGp = new JButton("Create new Group");
+		newGp.setBounds(220, 20, 170, 40);
 		
-		personalChats = new JButton("Personal");
-		personalChats.setBounds(340, 20, 100, 40);
-		
-		groupChat = new JButton("Groups");
-		groupChat.setBounds(460, 20, 90, 40);
+		viewEditGp = new JButton("View Edit Groups");
+		viewEditGp.setBounds(400, 20, 200, 40);
 		
 		logOutBtn = new JButton("Logout");
 		logOutBtn.setBounds(890, 20, 90, 40);
 		
-		currentChatStatus = new JLabel();
-		currentChatStatus.setFont(new Font("Dialog", Font.BOLD, 17));
-		currentChatStatus.setBounds(10, 80, 200, 40);
-		
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Users");
-		usersTree = new JTree(root);
-		usersTree.setFocusable(false);
+		userTreeRoot = new DefaultMutableTreeNode("Users");
+		usersTree = new JTree(userTreeRoot);
+		usersTree.setToggleClickCount(0);
+		usersTree.setFont(new Font("Dialog", Font.PLAIN, 15));
 		userTreeScrollPane = new JScrollPane(usersTree);
-		userTreeScrollPane.setBounds(10, 130, 200, 460);
+		userTreeScrollPane.setBounds(10, 80, 200, 510);
 		
 		messageBox = new JTextArea();
 		messageBox.setEditable(false);
@@ -291,7 +302,7 @@ public class ClientLoggedInMain
 	 */
 	private void initializeFrame()
 	{
-		clientFrame = new JFrame("Same Time: Welcome "+this.currentUser.getUserId());
+		clientFrame = new JFrame("Same Time: Welcome "+WordUtil.capitalizeString(this.currentUser.getUserId()));
 		clientFrame.setBounds(framex, framey, frameLength, frameheigth);
 		clientFrame.setBackground(bgColor);
 		clientFrame.getContentPane().setLayout(null);

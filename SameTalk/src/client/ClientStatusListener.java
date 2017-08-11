@@ -9,6 +9,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import beanClasses.ClientStatus;
+import clientHelper.CUtil;
 import helper.WordUtil;
 
 public class ClientStatusListener
@@ -54,6 +55,7 @@ public class ClientStatusListener
 				deptNode.add(posNode);
 			}
 			tree.insertNodeInto(deptNode, userRoot, userRoot.getChildCount());
-		} 
+		}
+		CUtil.expandAllNodes(usersTree, 0, usersTree.getRowCount());
 	}
 }
