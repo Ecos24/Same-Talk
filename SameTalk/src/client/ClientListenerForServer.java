@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
 import javax.swing.JTree;
 
 import beanClasses.ClientStatus;
@@ -22,7 +21,6 @@ public class ClientListenerForServer extends Thread
 	private ObjectInputStream serverInputStream;
 	
 	// For printing Messages.
-	private JTextArea clientMessageBox;
 	// Client's Frame reference.
 	private JFrame clientFrame;
 	
@@ -31,14 +29,13 @@ public class ClientListenerForServer extends Thread
 	private ClientStatusListener statusListener = null;
 
 	public ClientListenerForServer(ObjectInputStream serverInputStream, JFrame clientFrame ,
-			JTextArea messageBox, JTree userTree)
+			CUtil cutil, JTree userTree)
 	{
 		super();
 		this.clientFrame = clientFrame;
-		this.clientMessageBox = messageBox;
 		this.serverInputStream = serverInputStream;
 		this.statusListener = new ClientStatusListener(userTree);
-		this.utility = new CUtil(clientMessageBox);
+		this.utility = cutil;
 	}
 	
 	@Override
@@ -60,7 +57,13 @@ public class ClientListenerForServer extends Thread
 					{
 						FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());
 					}
-					utility.displayEvent(chatMessage.getMessage());
+					if( chatMessage.getMsgTargetType().equals(ChatMessage.MESSAGE_TARGET_BROADCAST) )
+						utility.displayEvent(chatMessage.getMessage());
+					else if( chatMessage.getMsgTargetType().equals(ChatMessage.MESSAGE_TARGET_GROUP) ||
+							 chatMessage.getMsgTargetType().equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
+					{
+						utility.displayPrivateGroupChat(chatMessage.getMessage());
+					}
 				}
 				else if( obj instanceof LinkedHashMap<?, ?> )
 				{

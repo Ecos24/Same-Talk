@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 
 import client.ClientListenerForServer;
 import client.ClientMain;
+import clientHelper.CUtil;
 import clientHelper.FileFunctions;
 import helper.ChatMessage;
 import helper.WordUtil;
@@ -48,6 +49,7 @@ public class ClientLoggedInMain
 	
 	private ClientMain client;
 	private ClientListenerForServer clistenerForServer;
+	private CUtil cutil;
 	private User currentUser;
 	private String targetAudience;
 	
@@ -80,9 +82,11 @@ public class ClientLoggedInMain
 		associateFrameComponents();
 		initListeners();
 
+		cutil = new CUtil(messageBox);
+		
 		// Create the Thread to listen from server.
 		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame,
-				messageBox, usersTree);
+				cutil, usersTree);
 		clistenerForServer.start();
 	
 		readMessage.requestFocus();
@@ -203,6 +207,9 @@ public class ClientLoggedInMain
 		});
 	}
 	
+	/**
+	 * This is called when a node is selected from the Users Tree in Main Client page.
+	 */
 	protected void userSelected()
 	{
 		TreePath[] path = usersTree.getSelectionPaths();
@@ -221,7 +228,11 @@ public class ClientLoggedInMain
 					if( node.getUserObject().toString().equals(selected) )
 					{
 						// A User is selected.
-						JOptionPane.showMessageDialog(clientFrame, "User");
+						ChatWindow chat = new ChatWindow(ChatMessage.MESSAGE_TARGET_PERSONAL, selected,
+								clistenerForServer, currentUser, client, cutil);
+						chat.clientChatFrame.setVisible(true);
+						
+						break;
 					}
 				}
 				else
@@ -230,6 +241,11 @@ public class ClientLoggedInMain
 					{
 						// A Group is Selected.
 						JOptionPane.showMessageDialog(clientFrame, "Group");
+						ChatWindow chat = new ChatWindow(ChatMessage.MESSAGE_TARGET_GROUP, selected,
+								clistenerForServer, currentUser, client, cutil);
+						chat.clientChatFrame.setVisible(true);
+						
+						break;
 					}
 				}
 				node = node.getNextNode();
