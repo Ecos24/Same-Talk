@@ -11,6 +11,7 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.HashMap;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
@@ -41,6 +42,8 @@ import java.awt.event.MouseAdapter;
 
 public class ClientLoggedInMain
 {
+	public static HashMap<String, String> idNameMapping;
+	
 	private final int framex = 100;
 	private final int framey = 100;
 	private final int frameLength = 1000;
@@ -318,7 +321,7 @@ public class ClientLoggedInMain
 	 */
 	private void initializeFrame()
 	{
-		clientFrame = new JFrame("Same Time: Welcome "+WordUtil.capitalizeString(this.currentUser.getUserId()));
+		clientFrame = new JFrame("Same Time: Welcome "+WordUtil.capitalizeString(this.currentUser.getUserName()));
 		clientFrame.setBounds(framex, framey, frameLength, frameheigth);
 		clientFrame.setBackground(bgColor);
 		clientFrame.getContentPane().setLayout(null);

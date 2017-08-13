@@ -1,6 +1,7 @@
 package client;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -10,6 +11,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import beanClasses.ClientStatus;
 import clientHelper.CUtil;
+import gUI.ClientLoggedInMain;
 import helper.WordUtil;
 
 public class ClientStatusListener
@@ -32,6 +34,9 @@ public class ClientStatusListener
 		userRoot.removeAllChildren();
 		tree.reload();
 		
+		// Initialize IdName Mapper.
+		ClientLoggedInMain.idNameMapping = new HashMap<>();
+		
 		LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>> clientStatusMap =
 				(LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>>)obj;
 		
@@ -50,7 +55,10 @@ public class ClientStatusListener
 				Iterator<ClientStatus> te = singlePosMap.iterator();
 				while( te.hasNext() )
 				{
-					posNode.add(new DefaultMutableTreeNode(WordUtil.capitalizeString(te.next().getClientId())));
+					ClientStatus cste = new ClientStatus();
+					cste = te.next();
+					ClientLoggedInMain.idNameMapping.put(cste.getClientName(), cste.getClientId());
+					posNode.add(new DefaultMutableTreeNode(WordUtil.capitalizeString(cste.getClientName())));
 				}
 				deptNode.add(posNode);
 			}

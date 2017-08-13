@@ -10,14 +10,21 @@ public class User implements Serializable
 	private static final long serialVersionUID = 1L;
 	
 	private String userId;
+	private String userName;
 	private String password;
 	private String department;
 	private String position;
 	
 	private String uniqueToken;
 	
-	
-	
+	public String getUserName()
+	{
+		return userName;
+	}
+	public void setUserName(String userName)
+	{
+		this.userName = userName;
+	}
 	public String getDepartment()
 	{
 		return department;

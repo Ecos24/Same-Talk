@@ -198,10 +198,11 @@ public class ClientLogIn
 		        		
 		        		try
 		                {
-		        			if( client.authenticate() )
+		        			User retrivedUser = client.authenticate(); 
+		        			if( retrivedUser != null )
 			                {
 			                    System.out.println("User Authenticated");
-			                    ClientLoggedInMain clientLoggedIn = new ClientLoggedInMain(user, client);
+			                    ClientLoggedInMain clientLoggedIn = new ClientLoggedInMain(retrivedUser, client);
 			                    clientLoggedIn.clientFrame.setVisible(true);
 		                		clientLogInframe.dispose();
 			                }

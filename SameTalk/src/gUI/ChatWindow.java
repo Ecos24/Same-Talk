@@ -1,7 +1,6 @@
 package gUI;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,28 +48,6 @@ public class ChatWindow
 	private JButton sendMessage;
 	private JButton shareFile;
 	
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args)
-	{
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				try
-				{
-					/*ChatWindow window = new ChatWindow();
-					window.clientChatFrame.setVisible(true);*/
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	
 	
 	/**
 	 * Create the application.
@@ -113,7 +90,7 @@ public class ChatWindow
 					readMessage.setText(null);
 					ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
 					chat.setMsgTargetType(targetAudience);
-					chat.setMsgTarget(selected);
+					chat.setMsgTarget(ClientLoggedInMain.idNameMapping.get(selected));
 					client.sendMessage(chat);
 				}
 			}

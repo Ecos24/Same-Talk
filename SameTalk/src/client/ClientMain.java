@@ -36,7 +36,7 @@ public class ClientMain
 		this.port = port;
 	}
 	
-	public boolean authenticate() throws IOException, ClassNotFoundException
+	public User authenticate() throws IOException, ClassNotFoundException
 	{
 		// Try to connect to Server.
 		try
@@ -82,7 +82,7 @@ public class ClientMain
 		if( !serveSocket.isConnected() )
 		{
 			displayCatchEvents("Connection Closed from Server Side might be due to UnAuthenticity of User.");
-			return false;
+			return null;
 		}
 		// Retrieve authentication Token from server.
 		User retrievedUser;
@@ -94,7 +94,7 @@ public class ClientMain
 		{
 			displayCatchEvents(e.getClass().getName() + " Exception reading Object doing LogIn --> " + e.getMessage());
 			disconnect();
-			return false;
+			return null;
 		}
 		
 		if( retrievedUser != null )
@@ -104,12 +104,12 @@ public class ClientMain
 				// Success we inform the caller that it worked.
 				System.out.println("Client successfully authenticated.");
 				
-				return true;
+				return retrievedUser;
 			}
 		}
 		
 		disconnect();
-		return false;
+		return null;
 	}
 
 	/**
