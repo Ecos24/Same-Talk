@@ -33,6 +33,7 @@ public class ClientLogIn
 	private static final int frameLength = 450;
 	private static final int frameheigth = 350;
 	private Color bgColor = new Color(238, 238, 238);
+	private boolean passFlag = true;
 	
 	private JFrame clientLogInframe;
 	private JLabel bgLabel;
@@ -40,10 +41,11 @@ public class ClientLogIn
 	private JTextPane serverIpTextPane;
 	private JTextField serverPort;
 	private JTextPane serverPortTextPane;
-	private JPasswordField password;
-	private JTextField userName;
 	private JTextPane userNameTextPane;
+	private JTextField userName;
 	private JTextPane passwordTextPane;
+	private JPasswordField password;
+	private JButton showHidePass;
 	private JButton LogIn;
 
 	/**
@@ -87,10 +89,11 @@ public class ClientLogIn
 		clientLogInframe.getContentPane().add(serverPort);
 		clientLogInframe.getContentPane().add(serverPortTextPane);
 		clientLogInframe.getContentPane().add(LogIn);
-		clientLogInframe.getContentPane().add(userName);
-		clientLogInframe.getContentPane().add(password);
 		clientLogInframe.getContentPane().add(userNameTextPane);
+		clientLogInframe.getContentPane().add(userName);
 		clientLogInframe.getContentPane().add(passwordTextPane);
+		clientLogInframe.getContentPane().add(password);
+		clientLogInframe.getContentPane().add(showHidePass);
 
 		clientLogInframe.getRootPane().setDefaultButton(LogIn);
 	}
@@ -138,6 +141,11 @@ public class ClientLogIn
 		passwordTextPane.setFocusable(false);
 		password = new JPasswordField();
 		password.setBounds(187, 219, 154, 20);
+		showHidePass = new JButton();
+		showHidePass.setBounds(345, 219, 20, 20);
+		showHidePass.setIcon(new ImageIcon(new ImageIcon("images/showPass.png").getImage()
+				.getScaledInstance(showHidePass.getWidth(), showHidePass.getHeight(), Image.SCALE_SMOOTH)));
+		showHidePass.setToolTipText("Show Password");
 		
 		LogIn = new JButton("LogIn");
 		LogIn.setBounds(((frameLength/2)-65), 268, 130, 20);
@@ -232,6 +240,32 @@ public class ClientLogIn
 				else
 				{
 					JOptionPane.showMessageDialog(clientLogInframe, "Please Provide Complete Details.");
+				}
+			}
+		});
+		
+		showHidePass.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if( passFlag )
+				{
+					password.setEchoChar((char) 0);
+					showHidePass.setIcon(new ImageIcon(new ImageIcon("images/hidePass.png").getImage()
+							.getScaledInstance(showHidePass.getWidth(), showHidePass.getHeight(),
+									Image.SCALE_SMOOTH)));
+					showHidePass.setToolTipText("Hide Password");
+					passFlag = false;
+				}
+				else
+				{
+					password.setEchoChar('*');
+					showHidePass.setIcon(new ImageIcon(new ImageIcon("images/showPass.png").getImage()
+							.getScaledInstance(showHidePass.getWidth(), showHidePass.getHeight(),
+									Image.SCALE_SMOOTH)));
+					showHidePass.setToolTipText("Show Password");
+					passFlag = true;
 				}
 			}
 		});
