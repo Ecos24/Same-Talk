@@ -164,7 +164,7 @@ public class ClientLogIn
 				int portNumber;
 				String serverAddress;
 				
-				String userN = userName.getText().toLowerCase();
+				String userN = userName.getText();
 				String pass = String.valueOf(password.getPassword());
 				if( !serverIp.getText().equals("") && !serverPort.getText().equals("") 
 						&& !userN.equals("") && !pass.equals("") )
