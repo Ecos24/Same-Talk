@@ -12,7 +12,7 @@ import javax.swing.tree.DefaultTreeModel;
 import beanClasses.ClientStatus;
 import clientHelper.CUtil;
 import gUI.ClientLoggedInMain;
-import helper.WordUtil;
+import helper.DateWordFormatter;
 
 public class ClientStatusListener
 {
@@ -44,13 +44,13 @@ public class ClientStatusListener
 		while(deptkeys.hasNext())
 		{
 			String dept = deptkeys.next();
-			DefaultMutableTreeNode deptNode = new DefaultMutableTreeNode(WordUtil.capitalizeString(dept));
+			DefaultMutableTreeNode deptNode = new DefaultMutableTreeNode(DateWordFormatter.capitalizeString(dept));
 			LinkedHashMap<String,ArrayList<ClientStatus>> singleDeptMap = clientStatusMap.get(dept);
 			Iterator<String> posKeys = singleDeptMap.keySet().iterator();
 			while( posKeys.hasNext() )
 			{
 				String pos = posKeys.next();
-				DefaultMutableTreeNode posNode = new DefaultMutableTreeNode(WordUtil.capitalizeString(pos));
+				DefaultMutableTreeNode posNode = new DefaultMutableTreeNode(DateWordFormatter.capitalizeString(pos));
 				ArrayList<ClientStatus> singlePosMap = singleDeptMap.get(pos);
 				Iterator<ClientStatus> te = singlePosMap.iterator();
 				while( te.hasNext() )
@@ -58,7 +58,7 @@ public class ClientStatusListener
 					ClientStatus cste = new ClientStatus();
 					cste = te.next();
 					ClientLoggedInMain.idNameMapping.put(cste.getClientName(), cste.getClientId());
-					posNode.add(new DefaultMutableTreeNode(WordUtil.capitalizeString(cste.getClientName())));
+					posNode.add(new DefaultMutableTreeNode(DateWordFormatter.capitalizeString(cste.getClientName())));
 				}
 				deptNode.add(posNode);
 			}

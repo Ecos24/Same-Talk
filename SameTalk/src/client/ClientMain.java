@@ -5,8 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import beanClasses.ChatMessage;
 import beanClasses.User;
-import helper.ChatMessage;
 
 /**
  * This Class provides main Functionality for client communication.

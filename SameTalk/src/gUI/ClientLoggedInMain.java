@@ -22,6 +22,7 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
+import beanClasses.ChatMessage;
 import beanClasses.User;
 
 import javax.swing.JLabel;
@@ -31,9 +32,8 @@ import javax.swing.JScrollPane;
 import client.ClientListenerForServer;
 import client.ClientMain;
 import clientHelper.CUtil;
-import clientHelper.FileFunctions;
-import helper.ChatMessage;
-import helper.WordUtil;
+import helper.FileFunctions;
+import helper.DateWordFormatter;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -321,7 +321,7 @@ public class ClientLoggedInMain
 	 */
 	private void initializeFrame()
 	{
-		clientFrame = new JFrame("Same Time: Welcome "+WordUtil.capitalizeString(this.currentUser.getUserName()));
+		clientFrame = new JFrame("Same Time: Welcome "+DateWordFormatter.capitalizeString(this.currentUser.getUserName()));
 		clientFrame.setBounds(framex, framey, frameLength, frameheigth);
 		clientFrame.setBackground(bgColor);
 		clientFrame.getContentPane().setLayout(null);

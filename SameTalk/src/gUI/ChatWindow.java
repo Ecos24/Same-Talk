@@ -17,13 +17,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import beanClasses.ChatMessage;
 import beanClasses.User;
 import client.ClientListenerForServer;
 import client.ClientMain;
 import clientHelper.CUtil;
-import clientHelper.FileFunctions;
-import helper.ChatMessage;
-import helper.WordUtil;
+import helper.FileFunctions;
+import helper.DateWordFormatter;
 
 public class ChatWindow
 {
@@ -168,7 +168,7 @@ public class ChatWindow
 	
 	private void initializeFrame()
 	{
-		clientChatFrame = new JFrame(WordUtil.capitalizeString(targetAudience) + " : " + WordUtil.capitalizeString(selected));
+		clientChatFrame = new JFrame(DateWordFormatter.capitalizeString(targetAudience) + " : " + DateWordFormatter.capitalizeString(selected));
 		clientChatFrame.setBounds(framex, framey, frameLength, frameheigth);
 		clientChatFrame.setBackground(bgColor);
 		clientChatFrame.getContentPane().setLayout(null);

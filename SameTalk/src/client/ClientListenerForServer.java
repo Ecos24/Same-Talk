@@ -10,10 +10,10 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
 
+import beanClasses.ChatMessage;
 import beanClasses.ClientStatus;
 import clientHelper.CUtil;
-import clientHelper.FileFunctions;
-import helper.ChatMessage;
+import helper.FileFunctions;
 
 public class ClientListenerForServer extends Thread
 {
