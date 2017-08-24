@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 
 import beanClasses.ChatMessage;
 import beanClasses.User;
+import chatDataBase.ChatDataConnection;
 import client.ClientListenerForServer;
 import client.ClientMain;
 import clientHelper.CUtil;
@@ -53,7 +54,7 @@ public class ChatWindow
 	 * Create the application.
 	 */
 	public ChatWindow( String targetAudience, String selectedNode, ClientListenerForServer clistenerForServer,
-			User currentUser, ClientMain client, CUtil cutil)
+			User currentUser, ClientMain client, CUtil cutil, ChatDataConnection chatConnector)
 	{
 		// Initialize References.
 		this.selected = selectedNode;
@@ -65,6 +66,12 @@ public class ChatWindow
 		
 		// Setup Frame.
 		initComponents();
+		
+		// Populate Saved Chat.
+		chatConnector.readTargetUserFileFile( targetAudience, selectedNode,
+				CUtil.idNameMapping.get(selectedNode), messageBox);
+		chatConnector.startReadingChat();
+		
 		initializeFrame();
 		associateFrameComponents();
 		initListeners();
@@ -90,7 +97,10 @@ public class ChatWindow
 					readMessage.setText(null);
 					ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
 					chat.setMsgTargetType(targetAudience);
-					chat.setMsgTarget(ClientLoggedInMain.idNameMapping.get(selected));
+					if( targetAudience.equalsIgnoreCase(ChatMessage.MESSAGE_TARGET_PERSONAL) )
+						chat.setMsgTarget(CUtil.idNameMapping.get(selected));
+					else
+						chat.setMsgTarget(selected);
 					client.sendMessage(chat);
 				}
 			}
@@ -113,7 +123,10 @@ public class ChatWindow
 					chat.setFileCheck(true);
 					chat.setFile(new File(path));
 					chat.setMsgTargetType(targetAudience);
-					chat.setMsgTarget(selected);
+					if( targetAudience.equalsIgnoreCase(ChatMessage.MESSAGE_TARGET_PERSONAL) )
+						chat.setMsgTarget(CUtil.idNameMapping.get(selected));
+					else
+						chat.setMsgTarget(selected);
 					client.sendMessage(chat);
 				}
 				else if(ans == 1)

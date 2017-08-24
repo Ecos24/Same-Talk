@@ -2,12 +2,15 @@ package clientHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 
 public class CUtil
 {
+	public static HashMap<String, String> idNameMapping;
+	
 	// To display time in hh:mm:ss
 	public static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm a");
 	private JTextArea clientMessageBox;
@@ -30,8 +33,7 @@ public class CUtil
 	 */
 	public void displayEvent(String msg)
 	{
-		String time = " "+ sdf.format(new Date()) + "\t" + msg;
-		clientMessageBox.append(time);
+		clientMessageBox.append("  "+msg);
 	}
 	
 	/**

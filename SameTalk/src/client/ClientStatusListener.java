@@ -11,7 +11,6 @@ import javax.swing.tree.DefaultTreeModel;
 
 import beanClasses.ClientStatus;
 import clientHelper.CUtil;
-import gUI.ClientLoggedInMain;
 import helper.DateWordFormatter;
 
 public class ClientStatusListener
@@ -35,7 +34,7 @@ public class ClientStatusListener
 		tree.reload();
 		
 		// Initialize IdName Mapper.
-		ClientLoggedInMain.idNameMapping = new HashMap<>();
+		CUtil.idNameMapping = new HashMap<>();
 		
 		LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>> clientStatusMap =
 				(LinkedHashMap<String,LinkedHashMap<String,ArrayList<ClientStatus>>>)obj;
@@ -57,7 +56,7 @@ public class ClientStatusListener
 				{
 					ClientStatus cste = new ClientStatus();
 					cste = te.next();
-					ClientLoggedInMain.idNameMapping.put(cste.getClientName(), cste.getClientId());
+					CUtil.idNameMapping.put(cste.getClientName(), cste.getClientId());
 					posNode.add(new DefaultMutableTreeNode(DateWordFormatter.capitalizeString(cste.getClientName())));
 				}
 				deptNode.add(posNode);

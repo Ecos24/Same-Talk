@@ -3,6 +3,7 @@ package client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -12,6 +13,7 @@ import javax.swing.JTree;
 
 import beanClasses.ChatMessage;
 import beanClasses.ClientStatus;
+import chatDataBase.ChatDataConnection;
 import clientHelper.CUtil;
 import helper.FileFunctions;
 
@@ -27,15 +29,17 @@ public class ClientListenerForServer extends Thread
 	// ClientUtil Reference.
 	private CUtil utility;
 	private ClientStatusListener statusListener = null;
+	private ChatDataConnection chatConnector;
 
 	public ClientListenerForServer(ObjectInputStream serverInputStream, JFrame clientFrame ,
-			CUtil cutil, JTree userTree)
+			CUtil cutil, JTree userTree, ChatDataConnection chatConnector)
 	{
 		super();
 		this.clientFrame = clientFrame;
 		this.serverInputStream = serverInputStream;
 		this.statusListener = new ClientStatusListener(userTree);
 		this.utility = cutil;
+		this.chatConnector = chatConnector;
 	}
 	
 	@Override
@@ -52,7 +56,9 @@ public class ClientListenerForServer extends Thread
 				System.out.println("Got an Object");
 				if( obj instanceof ChatMessage )
 				{
-					ChatMessage chatMessage = (ChatMessage) obj; 
+					ChatMessage chatMessage = (ChatMessage) obj;
+					chatMessage.setMessage(" "+ CUtil.sdf.format(new Date()) + "\t" +chatMessage.getMessage());
+					chatConnector.writeChatIntermediator(chatMessage);
 					if( chatMessage.isFileCheck() )
 					{
 						FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());

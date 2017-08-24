@@ -11,7 +11,6 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.HashMap;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
@@ -24,6 +23,7 @@ import javax.swing.tree.TreePath;
 
 import beanClasses.ChatMessage;
 import beanClasses.User;
+import chatDataBase.ChatDataConnection;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -41,9 +41,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 
 public class ClientLoggedInMain
-{
-	public static HashMap<String, String> idNameMapping;
-	
+{	
 	private final int framex = 100;
 	private final int framey = 100;
 	private final int frameLength = 1000;
@@ -52,6 +50,7 @@ public class ClientLoggedInMain
 	
 	private ClientMain client;
 	private ClientListenerForServer clistenerForServer;
+	private ChatDataConnection chatConnector;
 	private CUtil cutil;
 	private User currentUser;
 	private String targetAudience;
@@ -80,6 +79,9 @@ public class ClientLoggedInMain
 		this.currentUser = user;
 		this.client = client;
 		
+		chatConnector = new ChatDataConnection();
+		chatConnector.openUserChatFolder(user.getUserId(), user.getUserName());
+		
 		initComponents();
 		initializeFrame();
 		associateFrameComponents();
@@ -89,7 +91,7 @@ public class ClientLoggedInMain
 		
 		// Create the Thread to listen from server.
 		clistenerForServer = new ClientListenerForServer(client.getServerInputStream(), clientFrame,
-				cutil, usersTree);
+				cutil, usersTree, chatConnector);
 		clistenerForServer.start();
 	
 		readMessage.requestFocus();
@@ -232,7 +234,7 @@ public class ClientLoggedInMain
 					{
 						// A User is selected.
 						ChatWindow chat = new ChatWindow(ChatMessage.MESSAGE_TARGET_PERSONAL, selected,
-								clistenerForServer, currentUser, client, cutil);
+								clistenerForServer, currentUser, client, cutil, chatConnector);
 						chat.clientChatFrame.setVisible(true);
 						
 						break;
@@ -243,9 +245,8 @@ public class ClientLoggedInMain
 					if( node.getUserObject().toString().equals(selected) )
 					{
 						// A Group is Selected.
-						JOptionPane.showMessageDialog(clientFrame, "Group");
 						ChatWindow chat = new ChatWindow(ChatMessage.MESSAGE_TARGET_GROUP, selected,
-								clistenerForServer, currentUser, client, cutil);
+								clistenerForServer, currentUser, client, cutil, chatConnector);
 						chat.clientChatFrame.setVisible(true);
 						
 						break;
