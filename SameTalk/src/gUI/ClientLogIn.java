@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -225,6 +226,10 @@ public class ClientLogIn
 		                	JOptionPane.showMessageDialog(clientLogInframe, "User Can't Be Authenticated Internal Application Error!!");
 		                	System.out.println("JDBC connector Class Not Found.");
 						}
+		        		catch(ConnectException e)
+		        		{
+		        			JOptionPane.showMessageDialog(clientLogInframe, "No connection available on mentioned port.");
+		        		}
 		                catch(IOException e)
 		                {
 		                	JOptionPane.showMessageDialog(clientLogInframe, "User Can't Be Authenticated Internal Application Error!!");

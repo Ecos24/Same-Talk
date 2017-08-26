@@ -9,6 +9,7 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,6 +21,7 @@ import javax.swing.JTextField;
 import beanClasses.ChatMessage;
 import beanClasses.User;
 import chatDataBase.ChatDataConnection;
+import chatDataBase.ChatUtil;
 import client.ClientListenerForServer;
 import client.ClientMain;
 import clientHelper.CUtil;
@@ -95,7 +97,8 @@ public class ChatWindow
 				{
 					// Check Message.
 					readMessage.setText(null);
-					ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
+					ChatMessage chat = new ChatMessage(currentUser.getUserName(), currentUser.getUserId(),
+							ChatMessage.MESSAGE, msg, ChatUtil.sdf.format(new Date()));
 					chat.setMsgTargetType(targetAudience);
 					if( targetAudience.equalsIgnoreCase(ChatMessage.MESSAGE_TARGET_PERSONAL) )
 						chat.setMsgTarget(CUtil.idNameMapping.get(selected));
@@ -118,8 +121,9 @@ public class ChatWindow
 				int ans = JOptionPane.showConfirmDialog(clientChatFrame, "Do you really want's to share File -" + path);
 				if(ans == 0)
 				{
-					ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE,
-							FileFunctions.getFileName(path));
+					ChatMessage chat = new ChatMessage(currentUser.getUserName(),
+							currentUser.getUserId(), ChatMessage.MESSAGE,
+							FileFunctions.getFileName(path), ChatUtil.sdf.format(new Date()));
 					chat.setFileCheck(true);
 					chat.setFile(new File(path));
 					chat.setMsgTargetType(targetAudience);

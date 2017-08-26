@@ -1,13 +1,12 @@
 package chatDataBase;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.JTextArea;
 
 import beanClasses.ChatMessage;
+import clientHelper.CUtil;
 import helper.DateWordFormatter;
 
 public class ChatDataConnection
@@ -47,7 +46,16 @@ public class ChatDataConnection
 	}
 	
 	// instance DataMembers.
-	ThreadChatRead readingThread;
+	private String currentId;
+	private ThreadChatRead readingThread;
+	
+	// Constructor.
+	public ChatDataConnection(String currentId)
+	{
+		super();
+		this.currentId = currentId;
+	}
+	
 	private ThreadChatRead getReadingThread()
 	{
 		return readingThread;
@@ -58,7 +66,7 @@ public class ChatDataConnection
 	}
 
 	// File to Write to File.
-	public void writeChatIntermediator( ChatMessage chatMessage )
+	public void writeChatIntermediator( ChatMessage chatMessage ) throws IOException
 	{
 		String filePath;
 		switch(chatMessage.getMsgTargetType())
@@ -67,10 +75,15 @@ public class ChatDataConnection
 				filePath = mainPath+File.separator+"BroadCast";
 				File dirBroadcast = new File(filePath);
 				if( !dirBroadcast.exists() )
+				{
 					dirBroadcast.mkdir();
+					ChatUtil.createCSS(filePath);
+				}
 				try
 				{
-					writeChat(filePath, chatMessage.getMessage());
+					writeChat(filePath, chatMessage.getMessage(), chatMessage.getSendersUsername(),
+							chatMessage.getReceivedTime(),
+							CUtil.getGeneratorCode(chatMessage.getSendersId(), currentId), "BroadCast");
 				}
 				catch(IOException e)
 				{
@@ -82,10 +95,15 @@ public class ChatDataConnection
 							+File.separator+chatMessage.getMsgTarget();
 				File dirGroup = new File(filePath);
 				if( !dirGroup.exists() )
+				{
 					dirGroup.mkdirs();
+					ChatUtil.createCSS(filePath);
+				}
 				try
 				{
-					writeChat(filePath, chatMessage.getMessage());
+					writeChat(filePath, chatMessage.getMessage(), chatMessage.getSendersUsername(),
+							chatMessage.getReceivedTime(),
+							CUtil.getGeneratorCode(chatMessage.getSendersId(), currentId),"Group");
 				}
 				catch(IOException e)
 				{
@@ -97,35 +115,39 @@ public class ChatDataConnection
 							+File.separator+chatMessage.getMsgTarget();
 				File dirPersonal = new File(filePath);
 				if( !dirPersonal.exists() )
+				{
 					dirPersonal.mkdirs();
+					ChatUtil.createCSS(filePath);
+				}
 				try
 				{
-					writeChat(filePath, chatMessage.getMessage());
+					String name = CUtil.getKeyForValue(chatMessage.getMsgTarget());
+					writeChatPersonal(filePath, chatMessage.getMessage(), chatMessage.getReceivedTime(),
+							CUtil.getGeneratorCode(chatMessage.getSendersId(), currentId), name);
 				}
 				catch(IOException e)
 				{
 					e.printStackTrace();
 				}
 				break;
+			default:
+				System.out.println("Switch case not found while trying to write chat.");
 		}
 	}
 	
 	// Main Function to Write Chat to File.
-	private void writeChat(String filePath, String msg) throws IOException
+	private void writeChat(String filePath, String msg, String senderName, String recTime, int generator,
+			String chatName) throws IOException
 	{
 		File target = new File(filePath);
 		File[] all = target.listFiles();
-		if( all.length > 0 )
+		if( all.length > 1 )
 		{
 			for(File file : all)
 			{
 				if( file.getName().equalsIgnoreCase(DateWordFormatter.getCurrentDate()) )
 				{
-					FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-					BufferedWriter bw = new BufferedWriter(fw);
-					bw.write("  "+msg);
-					bw.close();
-					fw.close();
+					ChatUtil.updateHTML(file.getAbsolutePath(), senderName, recTime, msg, generator);
 					return;
 				}
 			}
@@ -133,17 +155,34 @@ public class ChatDataConnection
 		else
 		{
 			filePath += File.separator+DateWordFormatter.getCurrentDate();
-			File newFile = new File(filePath);
-			newFile.createNewFile();
-			FileWriter fw = new FileWriter(newFile.getAbsoluteFile(), true);
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write("(Received Time) (Sent Time) (Username) : (Message)\n");
-			bw.write("  "+msg);
-			bw.close();
-			fw.close();
+			ChatUtil.writeRawHTML(filePath, "Chat with :- "+chatName);
+			ChatUtil.updateHTML(filePath, senderName, recTime, msg, generator);
 		}
 	}
-
+	private void writeChatPersonal(String filePath, String msg, String recTime, int generator,
+			String chatName) throws IOException
+	{
+		File target = new File(filePath);
+		File[] all = target.listFiles();
+		if( all.length > 1 )
+		{
+			for(File file : all)
+			{
+				if( file.getName().equalsIgnoreCase(DateWordFormatter.getCurrentDate()) )
+				{
+					ChatUtil.updateHTMLPersonal(file.getAbsolutePath(), msg, recTime, generator);
+					return;
+				}
+			}
+		}
+		else
+		{
+			filePath += File.separator+DateWordFormatter.getCurrentDate();
+			ChatUtil.writeRawHTML(filePath, "Chat with :- "+chatName);
+			ChatUtil.updateHTMLPersonal(filePath, msg, recTime, generator);
+		}
+	}
+	
 	// Functions to Read File.
 	public void readTargetUserFileFile(String targetType, String clientName, String clientId,
 			JTextArea messageArea)

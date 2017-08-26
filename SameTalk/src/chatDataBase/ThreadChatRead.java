@@ -1,9 +1,6 @@
 package chatDataBase;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 import javax.swing.JTextArea;
 
@@ -27,24 +24,7 @@ public class ThreadChatRead extends Thread
 			orderFiles();
 			for(File file : clientFile)
 			{
-				try
-				{
-					BufferedReader br = new BufferedReader(new InputStreamReader
-							(new ReverseFileInputStream(file)));
-					while(true)
-					{
-						String r = br.readLine();
-						if( r == null )
-							break;
-						System.out.println(r);
-					}
-					br.close();
-					
-				}
-				catch(IOException e)
-				{
-					e.printStackTrace();
-				}
+				
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
@@ -24,6 +25,7 @@ import javax.swing.tree.TreePath;
 import beanClasses.ChatMessage;
 import beanClasses.User;
 import chatDataBase.ChatDataConnection;
+import chatDataBase.ChatUtil;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -79,7 +81,7 @@ public class ClientLoggedInMain
 		this.currentUser = user;
 		this.client = client;
 		
-		chatConnector = new ChatDataConnection();
+		chatConnector = new ChatDataConnection(currentUser.getUserId());
 		chatConnector.openUserChatFolder(user.getUserId(), user.getUserName());
 		
 		initComponents();
@@ -135,19 +137,12 @@ public class ClientLoggedInMain
 				String msg = readMessage.getText();
 				if( !msg.equals("") )
 				{
-					if( msg.equalsIgnoreCase("WHOSETHERE"))
-					{
-						readMessage.setText(null);
-						client.sendMessage(new ChatMessage(currentUser.getUserId(), ChatMessage.WHOSETHERE, ""));
-					}
-					else
-					{
-						// Check Message.
-						readMessage.setText(null);
-						ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, msg);
-						chat.setMsgTargetType(targetAudience);
-						client.sendMessage(chat);
-					}
+					// Check Message.
+					readMessage.setText(null);
+					ChatMessage chat = new ChatMessage(currentUser.getUserName(), currentUser.getUserId(),
+							ChatMessage.MESSAGE, msg, ChatUtil.sdf.format(new Date()));
+					chat.setMsgTargetType(targetAudience);
+					client.sendMessage(chat);
 				}
 			}
 		});
@@ -166,7 +161,9 @@ public class ClientLoggedInMain
 				int ans = JOptionPane.showConfirmDialog(clientFrame, "Do you really want's to share File -"+path);
 				if( ans == 0 )
 				{
-					ChatMessage chat = new ChatMessage(currentUser.getUserId(), ChatMessage.MESSAGE, FileFunctions.getFileName(path));
+					ChatMessage chat = new ChatMessage(currentUser.getUserName(),
+							currentUser.getUserId(), ChatMessage.MESSAGE,
+							FileFunctions.getFileName(path), ChatUtil.sdf.format(new Date()));
 					chat.setFileCheck(true);
 					chat.setFile(new File(path));
 					chat.setMsgTargetType(targetAudience);
@@ -191,7 +188,8 @@ public class ClientLoggedInMain
 				
 				try
 				{
-					client.sendMessage(new ChatMessage(currentUser.getUserId(), ChatMessage.LOGOUT, ""));
+					client.sendMessage(new ChatMessage(currentUser.getUserName(), currentUser.getUserId(),
+							ChatMessage.LOGOUT, "", ChatUtil.sdf.format(new Date())));
 				}
 				catch( NullPointerException e )
 				{
@@ -225,6 +223,8 @@ public class ClientLoggedInMain
 			{
 				selected = selected + treePath.getLastPathComponent();
 			}
+			if( selected.equalsIgnoreCase(this.currentUser.getUserName()) )
+				return;
 			DefaultMutableTreeNode node = userTreeRoot.getNextNode();
 			while( node != null )
 			{

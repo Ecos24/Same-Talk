@@ -57,18 +57,24 @@ public class ClientListenerForServer extends Thread
 				if( obj instanceof ChatMessage )
 				{
 					ChatMessage chatMessage = (ChatMessage) obj;
-					chatMessage.setMessage(" "+ CUtil.sdf.format(new Date()) + "\t" +chatMessage.getMessage());
+					chatMessage.setReceivedTime(CUtil.sdf.format(new Date()));
 					chatConnector.writeChatIntermediator(chatMessage);
 					if( chatMessage.isFileCheck() )
 					{
 						FileFunctions.saveFile(chatMessage.getFile(), chatMessage.getSendersUsername());
 					}
 					if( chatMessage.getMsgTargetType().equals(ChatMessage.MESSAGE_TARGET_BROADCAST) )
-						utility.displayEvent(chatMessage.getMessage());
+					{
+						utility.displayEvent(" "+ chatMessage.getReceivedTime() + "\t"
+								+chatMessage.getSentTime() + "   " + chatMessage.getSendersId()
+								+ " : " + chatMessage.getMessage());
+					}
 					else if( chatMessage.getMsgTargetType().equals(ChatMessage.MESSAGE_TARGET_GROUP) ||
 							 chatMessage.getMsgTargetType().equals(ChatMessage.MESSAGE_TARGET_PERSONAL) )
 					{
-						utility.displayPrivateGroupChat(chatMessage.getMessage());
+						utility.displayPrivateGroupChat(" "+ chatMessage.getReceivedTime() + "\t"
+								+chatMessage.getSentTime() + "   " + chatMessage.getSendersId()
+								+ " : " + chatMessage.getMessage());
 					}
 				}
 				else if( obj instanceof LinkedHashMap<?, ?> )
